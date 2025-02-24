@@ -4,6 +4,9 @@
  */
 package com.igalvezr.todoapp.controllers;
 
+import com.igalvezr.todoapp.entities.Task;
+import com.igalvezr.todoapp.services.TaskService;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,11 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/users")
 public class TaskController {
-    private TaskController taskController;
+    private TaskService taskService;
 
-    public TaskController(TaskController taskController) {
-        this.taskController = taskController;
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
     }
-    
-    
+
+    @GetMapping
+    public ResponseEntity retrieveAllTasks() {
+        List<Task> allTasks = taskService.getAll();
+        return ResponseEntity.ok(allTasks);
+    }
 }
