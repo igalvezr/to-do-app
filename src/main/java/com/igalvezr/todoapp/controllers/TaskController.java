@@ -5,11 +5,16 @@
 package com.igalvezr.todoapp.controllers;
 
 import com.igalvezr.todoapp.entities.Task;
+import com.igalvezr.todoapp.filtering.FilteredTasks;
+import com.igalvezr.todoapp.services.FilteringService;
 import com.igalvezr.todoapp.services.TaskService;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -17,17 +22,70 @@ import org.springframework.web.bind.annotation.RestController;
  * @author ivan
  */
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/tasks")
 public class TaskController {
     private TaskService taskService;
+    private FilteringService filteringService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, FilteringService filteringService) {
         this.taskService = taskService;
+        this.filteringService = filteringService;
     }
 
     @GetMapping
-    public ResponseEntity retrieveAllTasks() {
-        List<Task> allTasks = taskService.getAll();
-        return ResponseEntity.ok(allTasks);
+    public ResponseEntity retrieveAllTasks(
+            @RequestParam(required=false) String title_contains,
+            @RequestParam(required=false) String desc_contains,
+            @RequestParam(required=false) String priority,
+            @RequestParam(required=false) String desired_completion_start,
+            @RequestParam(required=false) String desired_completion_end,
+            @RequestParam(required=false) String creation_date_start,
+            @RequestParam(required=false) String creation_date_end
+            ) {
+        
+        String[] params = {
+            title_contains,
+            desc_contains,
+            priority,
+            desired_completion_start,
+            desired_completion_end,
+            creation_date_start,
+            creation_date_end
+        };
+        
+        boolean hasParams = false;
+        
+        for (var param : params) {
+            if (param != null)
+                hasParams = true;
+        }
+        
+        if (!hasParams) {
+            List<Task> allTasks = taskService.getAll();
+            return ResponseEntity.ok(allTasks);
+        }
+        
+        Map<FilteredTasks.FilterType, String[]> mappedParams = filteringService.getFiltertypeMappings(
+                title_contains, 
+                desc_contains, 
+                priority, 
+                desired_completion_start, 
+                desired_completion_end, 
+                creation_date_start, 
+                creation_date_end);
+        
+        List<Task> rawTasks = taskService.getAll();
+        List<Task> filteredTasks;
+        
+        try {
+            filteredTasks = filteringService.applyFilters(mappedParams, rawTasks);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.internalServerError().body("The filters couldn't be applied");
+        }
+        
+        
+        return ResponseEntity.ok(filteredTasks);
     }
+    
+    
 }
