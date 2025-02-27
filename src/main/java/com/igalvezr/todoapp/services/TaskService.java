@@ -88,4 +88,13 @@ public class TaskService {
 
         return task;
     }
+    
+    public int saveTask(Task task) {
+        Task saved = taskRepository.save(task);
+        
+        if (saved != null)
+            return 0;
+        else
+            return -1;
+    }
 }
