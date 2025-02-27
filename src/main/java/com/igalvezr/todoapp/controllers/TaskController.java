@@ -4,6 +4,7 @@
  */
 package com.igalvezr.todoapp.controllers;
 
+import com.igalvezr.todoapp.entities.State;
 import com.igalvezr.todoapp.entities.Task;
 import com.igalvezr.todoapp.entities.dto.TaskDTO;
 import com.igalvezr.todoapp.filtering.FilteredTasks;
@@ -15,7 +16,10 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -107,5 +111,19 @@ public class TaskController {
             return ResponseEntity.ok("The task has been stored correctly.");
         else
             return ResponseEntity.status(500).body("The task hasn't been created");
+    }
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity changeState(@PathVariable Integer id, @RequestParam State state) {
+        int result = taskService.changeState(id, state);
+        
+        if (0 == result) {
+            return ResponseEntity.ok("The state has been changed");
+        } else if (404 == result)
+            return ResponseEntity.internalServerError().body("The requested task doesn't exist");
+        else if (-1 == result)
+            return ResponseEntity.badRequest().body("The new state can't be equal to the previous state");
+        else
+            return ResponseEntity.badRequest().body("The task's state couldn't be changed");
     }
 }
