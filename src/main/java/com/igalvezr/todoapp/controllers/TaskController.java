@@ -5,14 +5,18 @@
 package com.igalvezr.todoapp.controllers;
 
 import com.igalvezr.todoapp.entities.Task;
+import com.igalvezr.todoapp.entities.dto.TaskDTO;
 import com.igalvezr.todoapp.filtering.FilteredTasks;
 import com.igalvezr.todoapp.services.FilteringService;
 import com.igalvezr.todoapp.services.TaskService;
-import java.util.HashMap;
+import jakarta.validation.Valid;
+import java.time.DateTimeException;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -87,5 +91,21 @@ public class TaskController {
         return ResponseEntity.ok(filteredTasks);
     }
     
-    
+    @PostMapping
+    public ResponseEntity createTask(@Valid @RequestBody TaskDTO taskData) {
+        Task taskEntity;
+        
+        try {
+            taskEntity = taskService.dtoToTask(taskData);
+        } catch (DateTimeException e) {
+            return ResponseEntity.badRequest().body("The date provided is invalid");
+        }
+        
+        int result = taskService.saveTask(taskEntity);
+        
+        if (0 == result)
+            return ResponseEntity.ok("The task has been stored correctly.");
+        else
+            return ResponseEntity.status(500).body("The task hasn't been created");
+    }
 }
