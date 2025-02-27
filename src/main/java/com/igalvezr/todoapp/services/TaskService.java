@@ -97,4 +97,33 @@ public class TaskService {
         else
             return -1;
     }
+    
+    public int changeState(Integer taskId, State state) {
+        Optional<Task> originalTask = taskRepository.findById(taskId);
+        
+        if (originalTask.isEmpty())
+            return 404; // not found code
+        
+        var taskEntity = originalTask.get();
+        
+        // check that we don't update to the same task
+        if (taskEntity.getState() == state)
+            return -1; // same state code
+        
+        // If the state WAS COMPLETED and now is different, we must delete the completion date
+        if (taskEntity.getState() == State.COMPLETED)
+            taskEntity.setCompletion_date(null);
+        
+        // If the state IS COMPLETED, then we also need to add the completed date
+        if (state == State.COMPLETED) {
+            taskEntity.setCompletion_date(LocalDateTime.now());
+        }
+        
+        // finally, update the state
+        taskEntity.setState(state);
+        
+        // Put the entity back into the db
+        taskRepository.save(taskEntity);
+        return 0;
+    }
 }
