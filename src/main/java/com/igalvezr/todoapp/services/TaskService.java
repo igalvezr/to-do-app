@@ -36,7 +36,7 @@ public class TaskService {
         if (result) {
             return -1;
         } else {
-            return 1;
+            return 0;
         }
     }
 
