@@ -5,10 +5,12 @@ import com.igalvezr.todoapp.entities.Task;
 import com.igalvezr.todoapp.entities.dto.DateTime;
 import com.igalvezr.todoapp.entities.dto.TaskDTO;
 import com.igalvezr.todoapp.repositories.TaskRepository;
+import java.lang.reflect.Field;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
@@ -125,5 +127,42 @@ public class TaskService {
         // Put the entity back into the db
         taskRepository.save(taskEntity);
         return 0;
+    }
+    
+    public Task updateEntity(Map<String, String> params, Integer id) throws IllegalStateException {
+        
+        Optional<Task> foundTask = taskRepository.findById(id);
+        if (foundTask.isEmpty())
+            throw new IllegalStateException("No task found with id " + id);
+        
+        Task validatedTask = foundTask.get();
+        
+        params.forEach((key, value) -> {
+            switch (key) {
+                case "title":
+                    validatedTask.setTitle(value);
+                    break;
+                case "description":
+                    validatedTask.setDescription(value);
+                    break;
+                case "priority":
+                    try {
+                        validatedTask.setPriority(Integer.parseInt(value));
+                    } catch (NumberFormatException e) {
+                        System.out.println("WARNING: Error parsing the new priority value");
+                        throw new IllegalStateException("The parameter for the new priority must be an integer");
+                    }
+                    break;
+                case "creation_date":
+                    throw new UnsupportedOperationException("Not supported");
+                    
+                case "due_date":
+                    throw new UnsupportedOperationException("Not supported");
+                default:
+                    System.out.println("WARNING: Unknown property " + key + " ignored");
+            }
+        });
+        
+        return validatedTask;
     }
 }
