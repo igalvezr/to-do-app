@@ -12,6 +12,7 @@ import com.igalvezr.todoapp.services.FilteringService;
 import com.igalvezr.todoapp.services.TaskService;
 import jakarta.validation.Valid;
 import java.time.DateTimeException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
@@ -136,5 +137,25 @@ public class TaskController {
             return ResponseEntity.ok("The task has been deleted");
         else 
             return ResponseEntity.internalServerError().body("The task hasn't been deleted");
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity modifyTask(@RequestBody Map<String, String> body, @PathVariable Integer id) {
+        
+        Task updatedTask;
+        try {
+            updatedTask = taskService.updateEntity(body, id);
+        } catch (IllegalStateException e) {
+            Map<String, String> errMessage = new HashMap<>();
+            errMessage.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errMessage);
+        }
+               
+        int result = taskService.saveTask(updatedTask);
+        
+        if (0 == result)
+            return ResponseEntity.ok("The entity has changed");
+        else
+            return ResponseEntity.internalServerError().body("The task couldn't be saved");
     }
 }
