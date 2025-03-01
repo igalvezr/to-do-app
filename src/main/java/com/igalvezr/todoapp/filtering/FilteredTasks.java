@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.igalvezr.todoapp.filtering;
 
 import com.igalvezr.todoapp.entities.Task;
@@ -48,6 +44,7 @@ public class FilteredTasks {
     // At the end of the filtering, we return the final list with the resulting
     // elements
     public List<Task> to_list() {
+        System.out.println("WARNING: Returning list with " + filtersApplied + " filters applied");
         return tasks;
     }
     
@@ -95,7 +92,7 @@ public class FilteredTasks {
                 try {
                     intPriority = Integer.parseInt(args[0]);
                 } catch (Exception e) {
-                    throw new IllegalStateException("The Priority filter's argument must be an Integer");
+                    throw new IllegalStateException("The Priority filter's argument must be an Integer. Value: " + args[0]);
                 }
                 
                 for (var task : tasks) {
@@ -105,10 +102,10 @@ public class FilteredTasks {
                 break;
             case COMPLETION_DATE:
                 // TODO: Support this
-                throw new UnsupportedOperationException("Filter type not supported");
+                throw new UnsupportedOperationException("Filter type not supported: completion date");
             case CREATION_DATE:
                 // TODO: Support this too
-                throw new UnsupportedOperationException("Filter type not supported");
+                throw new UnsupportedOperationException("Filter type not supported: completion date");
         }
         
         // When the specified filter has been applied, we return the result so it
